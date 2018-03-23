@@ -27,6 +27,12 @@ class ViewController: UIViewController {
     print("custom clicked")
     FBSDKLoginManager().logIn(withReadPermissions: ["email", "public_profile"], from: self) { (result, error) in
       if error != nil { print("custom login failed"); return }
+      FBSDKGraphRequest(graphPath: "/me", parameters: ["fields": "id,name,email"]).start(completionHandler: { (conn, res, error) in
+        
+        if error != nil { print("graph request failed"); return }
+        print(res)
+        
+      })
       print(result?.token.tokenString)
     }
   }
