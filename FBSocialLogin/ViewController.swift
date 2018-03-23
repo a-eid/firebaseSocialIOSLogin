@@ -17,24 +17,40 @@ class ViewController: UIViewController {
     let b = UIButton(type: .system)
     b.backgroundColor = #colorLiteral(red: 0.1411764771, green: 0.3960784376, blue: 0.5647059083, alpha: 1)
     b.setTitleColor(#colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0), for: .normal)
-    b.setTitle("Custom Login With Facebook", for: .normal)
+    b.setTitle( FBSDKAccessToken.current() == nil ? "Custom Login With Facebook": "logout" , for: .normal)
     b.translatesAutoresizingMaskIntoConstraints = false
     b.addTarget(self, action: #selector(fbCustomClick), for: .touchUpInside)
     return b
   }()
   
   @objc func fbCustomClick(){
-    print("custom clicked")
+
+    if FBSDKAccessToken.current() == nil {
+      fbCustomLogin()
+    }else {
+      fbCustomLogout()
+    }
+
+  }
+  
+
+  
+  func fbCustomLogin(){
     FBSDKLoginManager().logIn(withReadPermissions: ["email", "public_profile"], from: self) { (result, error) in
       if error != nil { print("custom login failed"); return }
       FBSDKGraphRequest(graphPath: "/me", parameters: ["fields": "id,name,email"]).start(completionHandler: { (conn, res, error) in
         
         if error != nil { print("graph request failed"); return }
         print(res)
-        
+        self.fbCustom.setTitle("Logout", for: .normal)
       })
       print(result?.token.tokenString)
     }
+  }
+  
+  func fbCustomLogout(){
+    FBSDKLoginManager().logOut()
+    fbCustom.setTitle("Login With Facebook", for: .normal)
   }
 
   override func viewDidLoad() {
@@ -72,10 +88,12 @@ class ViewController: UIViewController {
 
 extension ViewController: FBSDKLoginButtonDelegate  {
   
+
   func loginButtonDidLogOut(_ loginButton: FBSDKLoginButton!) {
-    print("did logout of facebook")
+    print("here")
+    fbCustom.setTitle("Login With Facebook", for: .normal)
   }
-  
+
   func loginButton(_ loginButton: FBSDKLoginButton!, didCompleteWith result: FBSDKLoginManagerLoginResult!, error: Error!) {
     
     if error != nil {
@@ -84,6 +102,7 @@ extension ViewController: FBSDKLoginButtonDelegate  {
     }
     
     print("successful")
+    fbCustom.setTitle("Logout", for: .normal)
     FBSDKGraphRequest(graphPath: "/me", parameters: ["fields": "id,name,email"]).start { (conn, res, error) in
       if error != nil {
         print("graph request failed")
