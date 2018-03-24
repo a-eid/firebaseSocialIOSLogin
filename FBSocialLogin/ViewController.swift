@@ -44,7 +44,9 @@ class ViewController: UIViewController {
         print(res)
         self.fbCustom.setTitle("Logout", for: .normal)
       })
-      print(result?.token.tokenString)
+      if let r = result {
+        print(r)
+      }
     }
   }
   
@@ -96,35 +98,23 @@ extension ViewController: FBSDKLoginButtonDelegate  {
 
   func loginButton(_ loginButton: FBSDKLoginButton!, didCompleteWith result: FBSDKLoginManagerLoginResult!, error: Error!) {
     
+    if result.isCancelled { return }
     if error != nil {
       print( "Error:: ", error)
       return
     }
     
     print("successful")
+    print(result.declinedPermissions)
+    
     fbCustom.setTitle("Logout", for: .normal)
     FBSDKGraphRequest(graphPath: "/me", parameters: ["fields": "id,name,email"]).start { (conn, res, error) in
       if error != nil {
         print("graph request failed")
         return
       }
-      print(res)
+      print(res ?? "")
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
